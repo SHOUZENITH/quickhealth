@@ -1,0 +1,71 @@
+-- 1. Create a table for User Profiles (Links to Supabase Auth)
+create table public.profiles (
+  id uuid references auth.users not null primary key,
+  display_name text,
+  gender text check (gender in ('Laki-laki', 'Perempuan')),
+  birth_date date, -- We store birth date to auto-calc age
+  height_cm int,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 2. Create the Assessments table (Stores the health check results)
+create table public.health_assessments (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  
+  -- Inputs (We save these so users can edit/review later)
+  weight_kg numeric,
+  height_cm numeric,
+  age int,
+  gender text,
+  
+  -- Detailed Inputs (Stored as JSON to keep schema clean if questions change)
+  -- Example: {"makan_freq": "3x", "tidur_durasi": "6-8 jam", ...}
+  form_data jsonb, 
+
+  -- Calculated Results
+  bmi numeric,
+  bmr numeric,
+  tdee numeric,
+  health_score int,
+  
+  -- Breakdown scores (stored as JSON)
+  -- Example: {"diet": 80, "sleep": 45, "mental": 90, "activity": 60}
+  score_breakdown jsonb
+);
+
+-- 3. Enable Row Level Security (RLS)
+-- This ensures users can ONLY see/edit their own data.
+alter table public.profiles enable row level security;
+alter table public.health_assessments enable row level security;
+
+-- 4. Create Policies
+-- Profiles: Users can view and update their own profile
+create policy "Users can view own profile" 
+  on public.profiles for select using (auth.uid() = id);
+
+create policy "Users can update own profile" 
+  on public.profiles for update using (auth.uid() = id);
+
+-- Assessments: Users can view their own history and insert new checks
+create policy "Users can view own assessments" 
+  on public.health_assessments for select using (auth.uid() = user_id);
+
+create policy "Users can create assessments" 
+  on public.health_assessments for insert with check (auth.uid() = user_id);
+
+-- 5. (Optional) Auto-create profile on signup
+-- This trigger automatically creates a row in 'profiles' when a user signs up via Auth
+create or replace function public.handle_new_user() 
+returns trigger as $$
+begin
+  insert into public.profiles (id, display_name)
+  values (new.id, new.raw_user_meta_data->>'full_name');
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();

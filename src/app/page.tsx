@@ -14,7 +14,7 @@ export default function Home() {
         
         <p className="text-xl text-blue-100 max-w-2xl mx-auto">
           Analyze your lifestyle, diet, and sleep patterns in seconds. 
-          Get a personalized health score without needing a doctor visit.
+          Your personalized health score, anytime, anywhere.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">

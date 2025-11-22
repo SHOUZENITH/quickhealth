@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { HealthInput, calcHealthScore, calcBMI, calcBMR, calcTDEE } from '@/utils/healthEngine';
+import { HealthInput } from '@/utils/healthEngine';
 import ResultView from '@/components/ResultView';
 
 export default function CalculatorPage() {
@@ -41,16 +41,22 @@ export default function CalculatorPage() {
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
+  // --- Handle Start Over Logic ---
+  const handleStartOver = () => {
+    setIsSubmitted(false); 
+    setStep(1);            
+    window.scrollTo(0, 0); 
+  };
+
   if (isSubmitted) {
-    return <ResultView data={formData} onRetry={() => setIsSubmitted(false)} />;
+    return <ResultView data={formData} onRetry={handleStartOver} />;
   }
 
-  // Reusable Styles for Input/Select to keep code clean
+  // Reusable Styles
   const inputClass = "mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500";
   const labelClass = "block text-gray-700 dark:text-gray-300 mb-1";
 
   return (
-    // Main Container: Added dark background support
     <div className="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-800 shadow-xl rounded-xl mt-10 transition-colors duration-200">
       
       {/* Progress Bar */}
@@ -62,12 +68,18 @@ export default function CalculatorPage() {
         Step {step}: {getStepTitle(step)}
       </h1>
 
-      {/* --- STEP 1: BIOMETRICS --- */}
+      {/* --- STEP 1: BIOMETRICS (Fixed Zero Issue) --- */}
       {step === 1 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="block">
             <span className={labelClass}>Umur (Tahun)</span>
-            <input type="number" value={formData.age} onChange={(e) => handleChange('age', Number(e.target.value))} className={inputClass} />
+            <input 
+              type="number" 
+              // ✅ Fix: Show empty string if 0
+              value={formData.age === 0 ? '' : formData.age} 
+              onChange={(e) => handleChange('age', Number(e.target.value))} 
+              className={inputClass} 
+            />
           </label>
           <label className="block">
             <span className={labelClass}>Gender</span>
@@ -78,11 +90,23 @@ export default function CalculatorPage() {
           </label>
           <label className="block">
             <span className={labelClass}>Tinggi (cm)</span>
-            <input type="number" value={formData.height} onChange={(e) => handleChange('height', Number(e.target.value))} className={inputClass} />
+            <input 
+              type="number" 
+              // ✅ Fix: Show empty string if 0
+              value={formData.height === 0 ? '' : formData.height} 
+              onChange={(e) => handleChange('height', Number(e.target.value))} 
+              className={inputClass} 
+            />
           </label>
           <label className="block">
             <span className={labelClass}>Berat (kg)</span>
-            <input type="number" value={formData.weight} onChange={(e) => handleChange('weight', Number(e.target.value))} className={inputClass} />
+            <input 
+              type="number" 
+              // ✅ Fix: Show empty string if 0
+              value={formData.weight === 0 ? '' : formData.weight} 
+              onChange={(e) => handleChange('weight', Number(e.target.value))} 
+              className={inputClass} 
+            />
           </label>
         </div>
       )}
@@ -93,41 +117,89 @@ export default function CalculatorPage() {
            <label className="block">
             <span className={labelClass}>Frekuensi Makan Utama</span>
             <select value={formData.makan_freq} onChange={(e) => handleChange('makan_freq', e.target.value)} className={inputClass}>
-              <option value="≤2x">≤2x</option>
-              <option value="3x">3x</option>
-              <option value="≥3x">≥3x</option>
+              <option value="≤2x">≤2x (Jarang)</option>
+              <option value="3x">3x (Normal)</option>
+              <option value="≥3x">≥3x (Sering)</option>
             </select>
           </label>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label className="block">
+                <span className={labelClass}>Fast Food per Minggu</span>
+                <select value={formData.fast_food} onChange={(e) => handleChange('fast_food', e.target.value)} className={inputClass}>
+                <option value="≤1x/minggu">Jarang (≤1x)</option>
+                <option value="2–3x/minggu">Sedang (2–3x)</option>
+                <option value="≥3x/minggu">Sering (≥3x)</option>
+                </select>
+            </label>
+            <label className="block">
+                <span className={labelClass}>Minuman Manis per Minggu</span>
+                <select value={formData.manis} onChange={(e) => handleChange('manis', e.target.value)} className={inputClass}>
+                <option value="≤1x/minggu">Jarang (≤1x)</option>
+                <option value="2–4x/minggu">Sedang (2–4x)</option>
+                <option value="≥4x/minggu">Sering (≥4x)</option>
+                </select>
+            </label>
+          </div>
+
+          <label className="block">
+            <span className={labelClass}>Konsumsi Sayur/Buah</span>
+            <select value={formData.sayur} onChange={(e) => handleChange('sayur', e.target.value)} className={inputClass}>
+              <option value="≤7x">Jarang (≤1x sehari)</option>
+              <option value="7–14x">Cukup (1-2x sehari)</option>
+              <option value="≥14x">Rutin (≥2x sehari)</option>
+            </select>
+          </label>
+
           <label className="block">
             <span className={labelClass}>Konsumsi Air Putih</span>
             <select value={formData.air} onChange={(e) => handleChange('air', e.target.value)} className={inputClass}>
-              <option value="≤1L">Kurang dari 1 Liter</option>
-              <option value="1–2L">1 - 2 Liter</option>
-              <option value="≥2L">Lebih dari 2 Liter</option>
+              <option value="≤1L">Kurang (≤1L)</option>
+              <option value="1–2L">Cukup (1–2L)</option>
+              <option value="≥2L">Bagus (≥2L)</option>
             </select>
           </label>
-           {/* Note: Add other fields (fast_food, sayur, etc.) here using the same pattern */}
         </div>
       )}
 
       {/* --- STEP 3: SLEEP & ACTIVITY --- */}
       {step === 3 && (
         <div className="space-y-4">
-           <label className="block">
-            <span className={labelClass}>Durasi Tidur</span>
-            <select value={formData.tidur_durasi} onChange={(e) => handleChange('tidur_durasi', e.target.value)} className={inputClass}>
-              <option value="≤6 jam">Kurang dari 6 jam</option>
-              <option value="6–8 jam">6 - 8 jam</option>
-              <option value="≥8 jam">Lebih dari 8 jam</option>
-            </select>
-          </label>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className="block">
+                    <span className={labelClass}>Durasi Tidur</span>
+                    <select value={formData.tidur_durasi} onChange={(e) => handleChange('tidur_durasi', e.target.value)} className={inputClass}>
+                    <option value="≤6 jam">Kurang (≤6 jam)</option>
+                    <option value="6–8 jam">Cukup (6–8 jam)</option>
+                    <option value="≥8 jam">Panjang (≥8 jam)</option>
+                    </select>
+                </label>
+                <label className="block">
+                    <span className={labelClass}>Kualitas Tidur</span>
+                    <select value={formData.tidur_quality} onChange={(e) => handleChange('tidur_quality', e.target.value)} className={inputClass}>
+                    <option value="Sangat lelah">Bangun Lelah</option>
+                    <option value="Netral">Biasa Saja</option>
+                    <option value="Sangat segar">Bangun Segar</option>
+                    </select>
+                </label>
+           </div>
+
           <label className="block">
             <span className={labelClass}>Frekuensi Olahraga</span>
             <select value={formData.olahraga} onChange={(e) => handleChange('olahraga', e.target.value)} className={inputClass}>
               <option value="Tidak pernah">Tidak pernah</option>
-              <option value="1–3x">1–3x sebulan</option>
-              <option value="4–8x">1-2x seminggu (4-8x sebulan)</option>
-              <option value="≥8x">Rutin ({'>'}2x seminggu)</option>
+              <option value="1–3x">Kadang-kadang (1–3x sebulan)</option>
+              <option value="4–8x">Rutin (1-2x seminggu)</option>
+              <option value="≥8x">Sangat Aktif ({'>'}2x seminggu)</option>
+            </select>
+          </label>
+          
+          <label className="block">
+            <span className={labelClass}>Langkah Harian (Estimasi)</span>
+            <select value={formData.langkah} onChange={(e) => handleChange('langkah', e.target.value)} className={inputClass}>
+              <option value="≤3000">Sedikit (≤3000)</option>
+              <option value="3000–7000">Sedang (3000–7000)</option>
+              <option value="≥7000">Banyak (≥7000)</option>
             </select>
           </label>
         </div>
@@ -138,7 +210,6 @@ export default function CalculatorPage() {
         <div className="space-y-4">
            <label className="block">
             <span className={labelClass}>Tingkat Stres (1-5)</span>
-            {/* Range input needs specific background styling usually, but standard works OK */}
             <input 
               type="range" 
               min="1" max="5" 
@@ -150,12 +221,27 @@ export default function CalculatorPage() {
                 <span>Santai</span><span>Sangat Stres</span>
             </div>
           </label>
+          
+          <label className="block">
+            <span className={labelClass}>Mood Rata-rata (1-5)</span>
+            <input 
+              type="range" 
+              min="1" max="5" 
+              value={formData.mood_level} 
+              onChange={(e) => handleChange('mood_level', Number(e.target.value))} 
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600" 
+            />
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <span>Buruk</span><span>Sangat Baik</span>
+            </div>
+          </label>
+
            <label className="block">
             <span className={labelClass}>Screen Time per hari</span>
              <select value={formData.screen} onChange={(e) => handleChange('screen', e.target.value)} className={inputClass}>
-              <option value="≤4 jam">≤4 jam</option>
-              <option value="4–6 jam">4–6 jam</option>
-              <option value="≥6 jam">≥6 jam</option>
+              <option value="≤4 jam">Rendah (≤4 jam)</option>
+              <option value="4–6 jam">Sedang (4–6 jam)</option>
+              <option value="≥6 jam">Tinggi (≥6 jam)</option>
             </select>
           </label>
         </div>

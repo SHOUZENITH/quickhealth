@@ -118,7 +118,7 @@ export default function ResultView({ data, onRetry }: ResultProps) {
         {/* Disclaimer */}
         <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-sm text-blue-800 dark:text-blue-200 border border-blue-100 dark:border-blue-800/30">
             <strong>Disclaimer:</strong> This is a simplified health algorithm for educational purposes. 
-            Please consult a doctor for professional medical advice.
+            Please consult our chatbot for more information or our doctor for professional medical advice.
         </div>
       </div>
 

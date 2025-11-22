@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { HealthInput } from '@/utils/healthEngine';
 import ResultView from '@/components/ResultView';
+import PageNavigation from '@/components/PageNavigation'; // <--- 1. Import this
 
 export default function CalculatorPage() {
   const [step, setStep] = useState(1);
@@ -59,6 +60,11 @@ export default function CalculatorPage() {
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-800 shadow-xl rounded-xl mt-10 transition-colors duration-200">
       
+      {/* --- 2. ADDED: Global Page Navigation (Exit Calculator) --- */}
+      <div className="mb-6">
+        <PageNavigation />
+      </div>
+
       {/* Progress Bar */}
       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-6">
         <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${(step / 4) * 100}%` }}></div>
@@ -68,14 +74,13 @@ export default function CalculatorPage() {
         Step {step}: {getStepTitle(step)}
       </h1>
 
-      {/* --- STEP 1: BIOMETRICS (Fixed Zero Issue) --- */}
+      {/* --- STEP 1: BIOMETRICS --- */}
       {step === 1 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="block">
             <span className={labelClass}>Umur (Tahun)</span>
             <input 
               type="number" 
-              // ✅ Fix: Show empty string if 0
               value={formData.age === 0 ? '' : formData.age} 
               onChange={(e) => handleChange('age', Number(e.target.value))} 
               className={inputClass} 
@@ -92,7 +97,6 @@ export default function CalculatorPage() {
             <span className={labelClass}>Tinggi (cm)</span>
             <input 
               type="number" 
-              // ✅ Fix: Show empty string if 0
               value={formData.height === 0 ? '' : formData.height} 
               onChange={(e) => handleChange('height', Number(e.target.value))} 
               className={inputClass} 
@@ -102,7 +106,6 @@ export default function CalculatorPage() {
             <span className={labelClass}>Berat (kg)</span>
             <input 
               type="number" 
-              // ✅ Fix: Show empty string if 0
               value={formData.weight === 0 ? '' : formData.weight} 
               onChange={(e) => handleChange('weight', Number(e.target.value))} 
               className={inputClass} 
@@ -247,7 +250,7 @@ export default function CalculatorPage() {
         </div>
       )}
 
-      {/* Navigation Buttons */}
+      {/* Navigation Buttons (Step Back / Next) */}
       <div className="flex justify-between mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
         {step > 1 ? (
           <button onClick={prevStep} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors">

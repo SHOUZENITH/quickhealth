@@ -2,6 +2,7 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import PageNavigation from '@/components/PageNavigation'; // <--- 1. Import this
 
 // This is a Server Component
 export default async function Dashboard() {
@@ -29,6 +30,12 @@ export default async function Dashboard() {
 
   return (
     <div className="max-w-5xl mx-auto p-6">
+      
+      {/* --- 2. ADDED: Navigation Bar --- */}
+      <div className="mb-2">
+        <PageNavigation />
+      </div>
+
       {/* Header Section */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Your Health History</h1>

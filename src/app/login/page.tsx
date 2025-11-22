@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
+import PageNavigation from '@/components/PageNavigation'; // <--- Import this
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -48,14 +49,19 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  // Reusable Input Class biar rapi
+  // Reusable Input Class
   const inputClass = "mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:placeholder-gray-400 transition-colors";
 
   return (
-    // Background utama: jadi gelap pas dark mode
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    // Updated layout: flex-col to stack the Nav above the Card
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-200 p-4">
       
-      {/* Card Login: Background putih/abu gelap */}
+      {/* --- 1. ADDED: Navigation Bar (Aligned with card width) --- */}
+      <div className="w-full max-w-md mb-2"> 
+         <PageNavigation />
+      </div>
+
+      {/* Card Login */}
       <div className="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md transition-colors duration-200">
         <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-6">
           Welcome to QuickHealth
@@ -101,7 +107,6 @@ export default function LoginPage() {
             <button
               onClick={handleSignUp}
               disabled={loading}
-              // Sign Up button: border & text adaptif
               className="flex-1 bg-white dark:bg-transparent text-blue-600 dark:text-blue-400 border border-blue-600 dark:border-blue-400 py-2 px-4 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50 transition-colors"
             >
               Sign Up

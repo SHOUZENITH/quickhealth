@@ -1,8 +1,14 @@
+import PageNavigation from '@/components/PageNavigation';
+
 export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-white py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Cookie Policy</h1>
+        
+        {/* --- 1. ADDED: Navigation Bar --- */}
+        <PageNavigation />
+
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Cookies Policy</h1>
         <p className="text-gray-500 mb-8">Last updated: November 2025</p>
 
         <div className="prose prose-blue max-w-none text-gray-600 space-y-6">

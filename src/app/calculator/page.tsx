@@ -1,15 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import Link from 'next/link'; // Added for the Home button fix
 import { HealthInput } from '@/utils/healthEngine';
 import ResultView from '@/components/ResultView';
-import PageNavigation from '@/components/PageNavigation';
+// Removed PageNavigation import since we are replacing it
 import { 
   ChevronRight, ChevronLeft, Activity, Moon, Utensils, Brain, 
-  Droplets, Dumbbell, Pizza, Coffee, Timer, Smile, Lightbulb
+  Droplets, Pizza, Coffee, Timer, Smile, Lightbulb,
+  Clock, Cigarette, Wine, Home // Added Home icon
 } from 'lucide-react';
 
+// Define Option type for the SelectionGrid
 type Option = {
   value: string | number;
   label: string;
@@ -21,13 +23,38 @@ export default function CalculatorPage() {
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Initial State
+  // --- STATE: Matches HealthInput interface exactly with Valid Defaults ---
   const [formData, setFormData] = useState<HealthInput>({
-    age: 25, gender: 'Laki-laki', height: 170, weight: 65,
-    makan_freq: '3x', fast_food: '≤1x/minggu', sayur: '7–14x', manis: '2–4x/minggu', air: '1–2L',
-    makan_tidur: '2–3 jam', tidur_durasi: '6–8 jam', tidur_konsistensi: 'Cukup teratur', tidur_siang: 'Tidak pernah', tidur_quality: 'Netral',
-    olahraga: '1–3x', gaya: 'Cukup aktif', langkah: '3000–7000', screen: '4–6 jam',
-    stres_level: 3, mood_level: 3, rokok: 'Tidak pernah', alkohol: 'Tidak pernah',
+    // 1. Data Dasar
+    age: 25, 
+    gender: 'Laki-laki', 
+    height: 170, 
+    weight: 65,
+    
+    // 2. Pola Makan
+    makan_freq: '3x', 
+    fast_food: '≤1x/minggu', 
+    sayur: '7–14x', 
+    manis: '2–4x/minggu', 
+    air: '1–2L',
+    makan_tidur: '2–3 jam', 
+
+    // 3. Pola Tidur & Aktivitas
+    tidur_durasi: '6–8 jam', 
+    tidur_konsistensi: 'Cukup teratur', 
+    tidur_siang: 'Tidak pernah', 
+    tidur_quality: 'Netral',
+    olahraga: '1–3x', 
+    // Important: Value must match healthEngine specific strings
+    gaya: 'Cukup aktif (kadang olahraga)', 
+    langkah: '3000–7000', 
+
+    // 4. Keseharian & Mental
+    screen: '4–6 jam',
+    stres_level: 3, 
+    mood_level: 3, 
+    rokok: 'Tidak pernah', 
+    alkohol: 'Tidak pernah', 
   });
 
   const handleChange = (field: keyof HealthInput, value: any) => {
@@ -47,7 +74,14 @@ export default function CalculatorPage() {
             </div>
             <div className="relative z-10 pt-6 px-4">
                 <div className="max-w-4xl mx-auto mb-6">
-                    <PageNavigation variant="glass" backText="Exit Results" />
+                    {/* FIXED: Exit Button with explicit colors */}
+                    <Link 
+                        href="/" 
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition text-gray-600 dark:text-blue-100 font-bold"
+                    >
+                        <Home className="w-5 h-5" />
+                        <span>Exit Results</span>
+                    </Link>
                 </div>
                 <ResultView data={formData} onRetry={handleStartOver} />
             </div>
@@ -55,7 +89,7 @@ export default function CalculatorPage() {
     );
   }
 
-  // --- SELECTION GRID ---
+  // --- SELECTION GRID COMPONENT ---
   const SelectionGrid = ({ field, options }: { field: keyof HealthInput, options: Option[] }) => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {options.map((opt) => (
@@ -95,16 +129,13 @@ export default function CalculatorPage() {
     </div>
   );
 
-  // STYLES
   const labelClass = "block text-sm font-bold text-gray-700 dark:text-blue-100 ml-1 mb-2 uppercase tracking-wider opacity-90";
-  
-  // FIX: Added `dark:[&>option]:bg-gray-900` so dropdown options are dark in dark mode
   const inputClass = "w-full rounded-2xl border border-gray-200 bg-gray-50 text-gray-900 p-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none placeholder-gray-400 text-lg dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-blue-200/20 dark:[&>option]:bg-gray-900 dark:[&>option]:text-white";
 
   return (
     <div className="min-h-screen relative bg-gray-50 dark:bg-[#0a192f] font-sans flex flex-col overflow-x-hidden transition-colors duration-300">
       
-      {/* BACKGROUND TEXTURE (Dark Mode Only) */}
+      {/* BACKGROUND TEXTURE */}
       <div className="fixed inset-0 z-0 hidden dark:block">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-950 via-indigo-950 to-slate-900"></div>
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
@@ -116,11 +147,19 @@ export default function CalculatorPage() {
         
         {/* Navigation Bar */}
         <div className="flex justify-between items-center mb-8">
-            <PageNavigation variant="glass" backText="Home" />
+            {/* FIXED: Home Button with explicit colors for Light/Dark mode */}
+            <Link 
+                href="/" 
+                className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-white/50 dark:hover:bg-white/10 transition text-gray-600 dark:text-blue-100 font-bold"
+            >
+                <Home className="w-5 h-5" />
+                <span>Home</span>
+            </Link>
+
             <div className="flex items-center gap-3">
                  <div className="text-right hidden sm:block">
                     <h1 className="text-gray-900 dark:text-white font-bold text-lg">Health Checkup</h1>
-                    <p className="text-gray-500 dark:text-blue-300 text-xs">AI-Powered Analysis</p>
+                    <p className="text-gray-500 dark:text-blue-300 text-xs">Full Analysis</p>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/50">
                     {step}
@@ -152,8 +191,8 @@ export default function CalculatorPage() {
 
                 {/* Form Area */}
                 <div className="p-8 flex-grow">
-                     {/* STEP 1 */}
-                     {step === 1 && (
+                      {/* STEP 1: DATA DASAR */}
+                      {step === 1 && (
                         <div className="space-y-10 animate-in slide-in-from-right-8 fade-in duration-500">
                             <div>
                                 <label className={labelClass}>Gender Identity</label>
@@ -164,7 +203,7 @@ export default function CalculatorPage() {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="space-y-2">
-                                    <label className={labelClass}>Age</label>
+                                    <label className={labelClass}>Age (years)</label>
                                     <input type="number" value={formData.age === 0 ? '' : formData.age} onChange={(e) => handleChange('age', Number(e.target.value))} className={inputClass} placeholder="25" />
                                 </div>
                                 <div className="space-y-2">
@@ -179,7 +218,7 @@ export default function CalculatorPage() {
                         </div>
                     )}
 
-                    {/* STEP 2 */}
+                    {/* STEP 2: POLA MAKAN */}
                     {step === 2 && (
                         <div className="space-y-8 animate-in slide-in-from-right-8 fade-in duration-500">
                              <div>
@@ -190,59 +229,100 @@ export default function CalculatorPage() {
                                     { value: '≥2L', label: 'Excellent', description: '> 2 Liters', icon: <Droplets className="w-6 h-6"/> },
                                 ]} />
                             </div>
+                            
                             <div className="h-px bg-gray-100 dark:bg-white/10 w-full"></div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-2">
                                     <label className={labelClass}>Meal Frequency</label>
                                     <select value={formData.makan_freq} onChange={(e) => handleChange('makan_freq', e.target.value)} className={inputClass}>
                                         <option value="≤2x">Skip meals (≤ 2x)</option>
                                         <option value="3x">Regular (3x)</option>
-                                        <option value="≥3x">Frequent Snacking (≥ 3x)</option>
+                                        <option value="≥3x">Frequent (≥ 3x)</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className={labelClass}>Veggie Intake</label>
+                                    <label className={labelClass}>Veggie/Fruit Intake</label>
                                     <select value={formData.sayur} onChange={(e) => handleChange('sayur', e.target.value)} className={inputClass}>
-                                        <option value="≤7x">Rarely</option>
-                                        <option value="7–14x">Sometimes (Daily)</option>
-                                        <option value="≥14x">Always (Every meal)</option>
+                                        <option value="≤7x">Rarely (≤7x/week)</option>
+                                        <option value="7–14x">Sometimes (7-14x/week)</option>
+                                        <option value="≥14x">Always ({'>'}14x/week)</option>
                                     </select>
                                 </div>
                             </div>
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-white/5 p-6 rounded-3xl border border-gray-100 dark:border-white/5">
+
+                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 dark:bg-white/5 p-6 rounded-3xl border border-gray-100 dark:border-white/5">
                                  <div>
-                                     <label className="text-sm font-bold text-gray-500 dark:text-blue-200 mb-3 block flex items-center gap-2"> <Pizza className="w-4 h-4"/> Fast Food / Week</label>
+                                     <label className="text-sm font-bold text-gray-500 dark:text-blue-200 mb-3 block flex items-center gap-2"> <Pizza className="w-4 h-4"/> Fast Food</label>
                                      <select value={formData.fast_food} onChange={(e) => handleChange('fast_food', e.target.value)} className={inputClass}>
                                         <option value="≤1x/minggu">Rare (≤1x)</option>
-                                        <option value="2–3x/minggu">Moderate (2–3x)</option>
+                                        <option value="2–3x/minggu">Mod. (2–3x)</option>
                                         <option value="≥3x/minggu">Often (≥3x)</option>
-                                    </select>
+                                     </select>
                                  </div>
                                  <div>
-                                     <label className="text-sm font-bold text-gray-500 dark:text-blue-200 mb-3 block flex items-center gap-2"> <Coffee className="w-4 h-4"/> Sweets / Week</label>
+                                     <label className="text-sm font-bold text-gray-500 dark:text-blue-200 mb-3 block flex items-center gap-2"> <Coffee className="w-4 h-4"/> Sweets</label>
                                      <select value={formData.manis} onChange={(e) => handleChange('manis', e.target.value)} className={inputClass}>
                                         <option value="≤1x/minggu">Rare (≤1x)</option>
-                                        <option value="2–4x/minggu">Moderate (2–4x)</option>
+                                        <option value="2–4x/minggu">Mod. (2–4x)</option>
                                         <option value="≥4x/minggu">Often (≥4x)</option>
-                                    </select>
+                                     </select>
+                                 </div>
+                                 <div>
+                                     <label className="text-sm font-bold text-gray-500 dark:text-blue-200 mb-3 block flex items-center gap-2"> <Clock className="w-4 h-4"/> Last Meal Gap</label>
+                                     <select value={formData.makan_tidur} onChange={(e) => handleChange('makan_tidur', e.target.value)} className={inputClass}>
+                                        <option value="≤2 jam">Too Close (≤2h)</option>
+                                        <option value="2–3 jam">Good (2-3h)</option>
+                                        <option value="≥3 jam">Ideal ({'>'}3h)</option>
+                                     </select>
                                  </div>
                             </div>
                         </div>
                     )}
 
-                    {/* STEP 3 */}
+                    {/* STEP 3: TIDUR & AKTIVITAS */}
                     {step === 3 && (
                         <div className="space-y-8 animate-in slide-in-from-right-8 fade-in duration-500">
                              <div>
-                                <label className={labelClass}>Weekly Exercise</label>
-                                <SelectionGrid field="olahraga" options={[
-                                    { value: 'Tidak pernah', label: 'None', description: 'No exercise', icon: <Dumbbell className="w-6 h-6"/> },
-                                    { value: '1–3x', label: 'Light', description: '1-3x / Month', icon: <Dumbbell className="w-6 h-6"/> },
-                                    { value: '4–8x', label: 'Active', description: '1-2x / Week', icon: <Dumbbell className="w-6 h-6"/> },
+                                <label className={labelClass}>Lifestyle & Activity</label>
+                                {/* Note: Values here match healthEngine keys exactly */}
+                                <SelectionGrid field="gaya" options={[
+                                    { value: 'Pasif (jarang bergerak)', label: 'Passive', description: 'Rarely moving', icon: <div className="text-2xl">🛋️</div> },
+                                    { value: 'Cukup aktif (kadang olahraga)', label: 'Moderate', description: 'Sometimes sport', icon: <div className="text-2xl">🚶</div> },
+                                    { value: 'Aktif (sering bergerak)', label: 'Active', description: 'Often moving', icon: <div className="text-2xl">🏃</div> },
                                 ]} />
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-2">
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label className={labelClass}>Exercise/Month</label>
+                                    <select value={formData.olahraga} onChange={(e) => handleChange('olahraga', e.target.value)} className={inputClass}>
+                                        <option value="Tidak pernah">Never</option>
+                                        <option value="1–3x">1-3x / Month</option>
+                                        <option value="4–8x">1-2x / Week</option>
+                                        <option value="≥8x">{'>'}2x / Week</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Sleep Consistency</label>
+                                    <select value={formData.tidur_konsistensi} onChange={(e) => handleChange('tidur_konsistensi', e.target.value)} className={inputClass}>
+                                        <option value="Tidak teratur">Irregular</option>
+                                        <option value="Cukup teratur">Okay</option>
+                                        <option value="Teratur">Consistent</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Naps (Siesta)</label>
+                                    <select value={formData.tidur_siang} onChange={(e) => handleChange('tidur_siang', e.target.value)} className={inputClass}>
+                                        <option value="Tidak pernah">Never</option>
+                                        <option value="≤1 jam/hari">Short (≤1h)</option>
+                                        <option value="1–2 jam/hari">Long (1-2h)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                 <div className="space-y-2">
                                     <label className={labelClass}>Sleep Duration</label>
                                     <div className="relative group">
                                         <Timer className="absolute left-4 top-4 w-5 h-5 text-gray-400 dark:text-blue-300"/>
@@ -253,14 +333,16 @@ export default function CalculatorPage() {
                                         </select>
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className={labelClass}>Daily Steps</label>
-                                     <div className="relative group">
-                                        <Activity className="absolute left-4 top-4 w-5 h-5 text-gray-400 dark:text-blue-300"/>
-                                        <select value={formData.langkah} onChange={(e) => handleChange('langkah', e.target.value)} className={`${inputClass} pl-12`}>
-                                            <option value="≤3000">Sedentary (≤3000)</option>
-                                            <option value="3000–7000">Moderate (3-7k)</option>
-                                            <option value="≥7000">Active (≥7000)</option>
+                                 <div className="space-y-2">
+                                    <label className={labelClass}>Sleep Quality</label>
+                                    <div className="relative group">
+                                        <Moon className="absolute left-4 top-4 w-5 h-5 text-gray-400 dark:text-blue-300"/>
+                                        <select value={formData.tidur_quality} onChange={(e) => handleChange('tidur_quality', e.target.value)} className={`${inputClass} pl-12`}>
+                                            <option value="Sangat lelah">Exhausted</option>
+                                            <option value="Lelah">Tired</option>
+                                            <option value="Netral">Neutral</option>
+                                            <option value="Cukup segar">Refreshed</option>
+                                            <option value="Sangat segar">Energized</option>
                                         </select>
                                     </div>
                                 </div>
@@ -268,7 +350,7 @@ export default function CalculatorPage() {
                         </div>
                     )}
 
-                    {/* STEP 4 */}
+                    {/* STEP 4: KESEHARIAN & MENTAL */}
                     {step === 4 && (
                         <div className="space-y-8 animate-in slide-in-from-right-8 fade-in duration-500">
                              <div className="bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 p-8 rounded-[2rem] border border-white/20 dark:border-white/10">
@@ -277,7 +359,7 @@ export default function CalculatorPage() {
                                     <span className="text-3xl font-black text-purple-600 dark:text-purple-300">{formData.stres_level}/5</span>
                                 </div>
                                 <input type="range" min="1" max="5" value={formData.stres_level} onChange={(e) => handleChange('stres_level', Number(e.target.value))} className="w-full h-3 bg-gray-300 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500 dark:accent-purple-400" />
-                                <div className="flex justify-between text-xs font-bold text-purple-600/50 dark:text-purple-200/50 mt-3 uppercase tracking-wider"><span>Very Relaxed</span><span>Highly Stressed</span></div>
+                                <div className="flex justify-between text-xs font-bold text-purple-600/50 dark:text-purple-200/50 mt-3 uppercase tracking-wider"><span>Relaxed</span><span>Stressed</span></div>
                             </div>
 
                              <div className="bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 p-8 rounded-[2rem] border border-white/20 dark:border-white/10">
@@ -286,16 +368,37 @@ export default function CalculatorPage() {
                                     <span className="text-3xl font-black text-yellow-600 dark:text-yellow-300">{formData.mood_level}/5</span>
                                 </div>
                                 <input type="range" min="1" max="5" value={formData.mood_level} onChange={(e) => handleChange('mood_level', Number(e.target.value))} className="w-full h-3 bg-gray-300 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-500 dark:accent-yellow-400" />
-                                <div className="flex justify-between text-xs font-bold text-yellow-600/50 dark:text-yellow-200/50 mt-3 uppercase tracking-wider"><span>Unhappy</span><span>Very Happy</span></div>
+                                <div className="flex justify-between text-xs font-bold text-yellow-600/50 dark:text-yellow-200/50 mt-3 uppercase tracking-wider"><span>Bad</span><span>Great</span></div>
                             </div>
                             
-                            <div>
-                                <label className={labelClass}>Daily Screen Time</label>
-                                <SelectionGrid field="screen" options={[
-                                    { value: '≤4 jam', label: 'Low', description: 'Healthy amount', icon: <span className="text-2xl">🌿</span> },
-                                    { value: '4–6 jam', label: 'Average', description: 'Normal usage', icon: <span className="text-2xl">📱</span> },
-                                    { value: '≥6 jam', label: 'High', description: 'Heavy usage', icon: <span className="text-2xl">🤖</span> },
-                                ]} />
+                            {/* Habits Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                 <div className="space-y-2">
+                                    <label className={labelClass}>Screen Time</label>
+                                    <select value={formData.screen} onChange={(e) => handleChange('screen', e.target.value)} className={inputClass}>
+                                        <option value="≤4 jam">Low (≤4h)</option>
+                                        <option value="4–6 jam">Avg (4-6h)</option>
+                                        <option value="≥6 jam">High (≥6h)</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className={labelClass}><Cigarette className="w-3 h-3 inline mr-1"/> Smoking</label>
+                                    <select value={formData.rokok} onChange={(e) => handleChange('rokok', e.target.value)} className={inputClass}>
+                                        <option value="Tidak pernah">Never</option>
+                                        <option value="≤1x/bulan">Rarely</option>
+                                        <option value="1–3x/bulan">Sometimes</option>
+                                        <option value="≥1x/minggu">Often</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className={labelClass}><Wine className="w-3 h-3 inline mr-1"/> Alcohol</label>
+                                    <select value={formData.alkohol} onChange={(e) => handleChange('alkohol', e.target.value)} className={inputClass}>
+                                        <option value="Tidak pernah">Never</option>
+                                        <option value="≤1x/bulan">Rarely</option>
+                                        <option value="1–3x/bulan">Sometimes</option>
+                                        <option value="≥1x/minggu">Often</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -324,9 +427,8 @@ export default function CalculatorPage() {
             {/* RIGHT COLUMN: INFO PANEL */}
             <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8 h-fit">
                 
-                {/* 1. Dynamic Tip Card - FIX: Dark background for Dark Mode to make text readable */}
+                {/* Dynamic Tip Card */}
                 <div className="bg-white dark:bg-slate-900/90 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-8 text-gray-900 dark:text-white relative overflow-hidden group shadow-lg">
-                    {/* Glow effect only in dark mode */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-[80px] group-hover:bg-blue-400/30 transition duration-1000 hidden dark:block"></div>
                     
                     <div className="relative z-10">
@@ -344,34 +446,29 @@ export default function CalculatorPage() {
                                     <p className="text-gray-600 dark:text-blue-100/90 leading-relaxed mb-6">
                                         Body Mass Index (BMI) is a useful screening tool, but it doesn't measure body fat directly or account for muscle mass.
                                     </p>
-                                    <div className="w-full h-40 bg-gray-100 dark:bg-white/10 rounded-xl overflow-hidden relative border border-gray-200 dark:border-white/10">
-                                        <div className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-blue-200/50 text-xs uppercase font-bold tracking-widest">
-                                            [BMI Chart Visualization]
-                                        </div>
-                                    </div>
                                 </div>
                             )}
                              {step === 2 && (
                                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    <h3 className="text-2xl font-bold mb-3 leading-tight">Hydration powers your brain.</h3>
+                                    <h3 className="text-2xl font-bold mb-3 leading-tight">Balanced Plate.</h3>
                                     <p className="text-gray-600 dark:text-blue-100/90 leading-relaxed mb-6">
-                                        Even mild dehydration (1-3% of body weight) can impair energy levels and mood.
+                                        A healthy meal should consist of 1/2 vegetables, 1/4 protein, and 1/4 carbohydrates.
                                     </p>
                                 </div>
                             )}
                              {step === 3 && (
                                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    <h3 className="text-2xl font-bold mb-3 leading-tight">Walking adds years to life.</h3>
+                                    <h3 className="text-2xl font-bold mb-3 leading-tight">Circadian Rhythm.</h3>
                                     <p className="text-gray-600 dark:text-blue-100/90 leading-relaxed mb-6">
-                                        Studies show that walking 7,000 steps a day can reduce your risk of premature death by 50% to 70%.
+                                        Going to bed and waking up at the same time every day helps regulate your body clock better than catching up on sleep.
                                     </p>
                                 </div>
                             )}
                              {step === 4 && (
                                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    <h3 className="text-2xl font-bold mb-3 leading-tight">Stress affects digestion.</h3>
+                                    <h3 className="text-2xl font-bold mb-3 leading-tight">Habits compound.</h3>
                                     <p className="text-gray-600 dark:text-blue-100/90 leading-relaxed mb-6">
-                                        The gut and brain are connected. High stress can disrupt the bacteria in your gut.
+                                        Small reductions in screen time or smoking frequency can have massive long-term benefits for mental clarity.
                                     </p>
                                 </div>
                             )}
@@ -379,7 +476,7 @@ export default function CalculatorPage() {
                     </div>
                 </div>
 
-                {/* 2. Privacy Badge */}
+                {/* Privacy Badge */}
                 <div className="bg-white dark:bg-black/20 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-3xl p-6 text-center shadow-sm">
                     <div className="text-3xl mb-2">🔒</div>
                     <h4 className="text-gray-900 dark:text-white font-bold">Encrypted & Private</h4>
@@ -411,4 +508,4 @@ function getStepTitle(step: number) {
       case 4: return "Mental Wellbeing";
       default: return "";
     }
-  }
+}

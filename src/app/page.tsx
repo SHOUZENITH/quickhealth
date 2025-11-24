@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
@@ -15,19 +15,28 @@ import {
   Lock, 
   CheckCircle2,
   Instagram,
-  X // Added X for closing the modal
+  X 
 } from 'lucide-react';
 
 // --- MAIN HOME COMPONENT ---
 export default function Home() {
-  // State to control the Login Modal visibility
   const [showLogin, setShowLogin] = useState(false);
+  const [session, setSession] = useState<any>(null);
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+    };
+    checkUser();
+  }, [supabase.auth]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col relative">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col relative transition-colors duration-300">
       
       {/* --- 1. NAVBAR --- */}
-      <nav className="bg-white border-b sticky top-0 z-50">
+      <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             {/* Logo Area */}
@@ -40,25 +49,37 @@ export default function Home() {
                   className="object-contain rounded-lg"
                 />
               </div>
-              <span className="text-2xl font-bold text-gray-900 -ml-2">
+              <span className="text-2xl font-bold text-gray-900 dark:text-white -ml-2">
                 QuickHealth
               </span>
             </div>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex gap-8 text-sm font-medium text-gray-600">
-              <Link href="#" className="hover:text-blue-600">Services</Link>
-              <Link href="#" className="hover:text-blue-600">Doctors</Link>
-              <Link href="#" className="hover:text-blue-600">Articles</Link>
+            <div className="hidden md:flex gap-8 text-sm font-medium text-gray-600 dark:text-gray-300">
+              <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Services</Link>
+              <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Doctors</Link>
+              <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Articles</Link>
             </div>
 
-            {/* Auth Button - NOW OPENS MODAL */}
-            <button 
-              onClick={() => setShowLogin(true)}
-              className="bg-gray-900 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition"
-            >
-              Login / History
-            </button>
+            {/* --- AUTH BUTTON LOGIC --- */}
+            {session ? (
+              // IF LOGGED IN: Show Dashboard Button
+              <Link 
+                href="/dashboard"
+                className="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-500/30"
+              >
+                Go to Dashboard
+              </Link>
+            ) : (
+              // IF LOGGED OUT: Show Login Button (Updated Style)
+              <button 
+                onClick={() => setShowLogin(true)}
+                // CHANGED HERE: Removed 'dark:bg-white' and replaced with consistent dark styles
+                className="bg-gray-900 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-gray-800 dark:bg-blue-600 dark:hover:bg-blue-700 transition shadow-lg dark:shadow-blue-500/20"
+              >
+                Login / SignUp
+              </button>
+            )}
           </div>
         </div>
       </nav>
@@ -145,73 +166,73 @@ export default function Home() {
       {/* --- 3. FEATURES GRID --- */}
       <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900">Everything you need for better health</h2>
-          <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Everything you need for better health</h2>
+          <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             From instant analysis to professional consultations, we have got you covered.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <FeatureCard 
-            icon={<Activity className="w-6 h-6 text-blue-600" />}
+            icon={<Activity className="w-6 h-6 text-blue-600 dark:text-blue-400" />}
             title="Instant Checkup"
             description="Analyze BMI, BMR, and lifestyle habits in under 2 minutes."
             badge="Free Forever"
-            badgeColor="bg-green-100 text-green-800"
+            badgeColor="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
             href="/calculator"
             buttonText="Start Now"
             active={true}
           />
           <FeatureCard 
-            icon={<Pill className="w-6 h-6 text-purple-600" />}
+            icon={<Pill className="w-6 h-6 text-purple-600 dark:text-purple-400" />}
             title="Quick Apotek"
             description="Order vitamins & supplements. Delivery in <2 hours."
             badge="Free Access"
-            badgeColor="bg-green-100 text-green-800"
+            badgeColor="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
             href="#"
             buttonText="Browse Store"
             active={false} 
             footer="Coming Soon"
           />
           <FeatureCard 
-            icon={<BookOpen className="w-6 h-6 text-orange-600" />}
+            icon={<BookOpen className="w-6 h-6 text-orange-600 dark:text-orange-400" />}
             title="Health Library"
             description="Verified articles on nutrition, sleep, and mental wellness."
             badge="Free"
-            badgeColor="bg-green-100 text-green-800"
+            badgeColor="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
             href="#"
             buttonText="Read Articles"
             active={false}
             footer="Coming Soon"
           />
           <FeatureCard 
-            icon={<Stethoscope className="w-6 h-6 text-rose-600" />}
+            icon={<Stethoscope className="w-6 h-6 text-rose-600 dark:text-rose-400" />}
             title="Consult Doctor"
             description="Video call with General Practitioners and Specialists."
             badge="Subscription"
-            badgeColor="bg-gray-900 text-white"
+            badgeColor="bg-gray-900 text-white dark:bg-white dark:text-gray-900"
             href="#"
             buttonText="Upgrade to Pro"
             active={false}
             locked={true}
           />
           <FeatureCard 
-            icon={<Bot className="w-6 h-6 text-indigo-600" />}
+            icon={<Bot className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
             title="Health Assistant"
             description="24/7 Personalized health advice based on your data."
             badge="Subscription"
-            badgeColor="bg-gray-900 text-white"
+            badgeColor="bg-gray-900 text-white dark:bg-white dark:text-gray-900"
             href="#"
             buttonText="Upgrade to Pro"
             active={false}
             locked={true}
           />
           <FeatureCard 
-            icon={<CheckCircle2 className="w-6 h-6 text-teal-600" />}
+            icon={<CheckCircle2 className="w-6 h-6 text-teal-600 dark:text-teal-400" />}
             title="Lab Tests"
             description="Book home sample collection for blood tests."
             badge="Coming Soon"
-            badgeColor="bg-gray-100 text-gray-600"
+            badgeColor="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
             href="#"
             buttonText="Join Waitlist"
             active={false}
@@ -220,12 +241,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- 4. REVISED FOOTER --- */}
+      {/* --- 4. FOOTER --- */}
       <footer className="bg-gray-900 text-white pt-16 pb-8 border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                
-                {/* Column 1: Brand */}
               <div className="col-span-1 md:col-span-2">
                     <div className="flex items-center gap-0 mb-4">
                         <div className="relative w-16 h-16 flex-shrink-0">
@@ -244,29 +263,24 @@ export default function Home() {
                         Empowering individuals to take control of their well-being through accessible technology, professional medical guidance, and simplified healthcare services.
                     </p>
                 </div>
-                
-                {/* Column 2: Company */}
                 <div>
                     <h4 className="font-bold text-lg mb-4 text-white">Company</h4>
                     <ul className="space-y-3 text-gray-400 text-sm">
-                        <li><Link href="/about" className="hover:text-blue-400 transition">About Us</Link></li>
-                        <li><Link href="/partner" className="hover:text-blue-400 transition">Partner with Us</Link></li>
-                        <li><Link href="/contact" className="hover:text-blue-400 transition">Contact Support</Link></li>
+                        <li><Link href="/footer/about" className="hover:text-blue-400 transition">About Us</Link></li>
+                        <li><Link href="/footer/partner" className="hover:text-blue-400 transition">Partner with Us</Link></li>
+                        <li><Link href="/footer/contact" className="hover:text-blue-400 transition">Contact Support</Link></li>
                     </ul>
                 </div>
-
-                {/* Column 3: Legal */}
                 <div>
                     <h4 className="font-bold text-lg mb-4 text-white">Legal</h4>
                     <ul className="space-y-3 text-gray-400 text-sm">
-                        <li><Link href="/privacy" className="hover:text-blue-400 transition">Privacy Policy</Link></li>
-                        <li><Link href="/terms" className="hover:text-blue-400 transition">Terms of Service</Link></li>
-                        <li><Link href="/cookie" className="hover:text-blue-400 transition">Cookie Policy</Link></li>
+                        <li><Link href="/footer/privacy" className="hover:text-blue-400 transition">Privacy Policy</Link></li>
+                        <li><Link href="/footer/terms" className="hover:text-blue-400 transition">Terms of Service</Link></li>
+                        <li><Link href="/footer/cookie" className="hover:text-blue-400 transition">Cookie Policy</Link></li>
                     </ul>
                 </div>
             </div>
             
-            {/* Bottom Bar */}
             <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p className="text-gray-500 text-sm">© 2025 QuickHealth. All rights reserved.</p>
                 <div className="flex gap-6 items-center">
@@ -281,7 +295,7 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* --- LOGIN MODAL (Conditionally Rendered) --- */}
+      {/* --- LOGIN MODAL --- */}
       {showLogin && (
          <LoginModal onClose={() => setShowLogin(false)} />
       )}
@@ -329,77 +343,52 @@ function LoginModal({ onClose }: { onClose: () => void }) {
     setLoading(false);
   };
 
-  const inputClass = "mt-1 block w-full rounded-xl border border-gray-200 bg-gray-50 text-gray-900 p-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-white transition-all outline-none";
+  const inputClass = "mt-1 block w-full rounded-xl border border-gray-200 bg-gray-50 text-gray-900 p-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:bg-gray-700 transition-all outline-none";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Dark Overlay with Blur */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-      
-      {/* Modal Content */}
-      <div className="relative bg-white/90 backdrop-blur-xl w-full max-w-md rounded-3xl shadow-2xl p-8 border border-white/40 animate-in fade-in zoom-in duration-200">
-        
-        {/* Close Button */}
-        <button 
-          onClick={onClose} 
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition text-gray-500"
-        >
+      <div className="relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl w-full max-w-md rounded-3xl shadow-2xl p-8 border border-white/40 dark:border-gray-700 animate-in fade-in zoom-in duration-200">
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-500">
           <X className="w-5 h-5" />
         </button>
-
-        {/* Branding */}
         <div className="flex flex-col items-center mb-6">
             <div className="flex items-center gap-2">
                 <div className="relative w-12 h-12 flex-shrink-0">
-                    <Image 
-                        src="/logonobg.jpg"
-                        alt="QuickHealth Logo"
-                        fill 
-                        className="object-contain rounded-lg"
-                    />
+                    <Image src="/logonobg.jpg" alt="QuickHealth Logo" fill className="object-contain rounded-lg" />
                 </div>
-                <span className="text-2xl font-bold text-gray-900 tracking-tight">
-                    QuickHealth
-                </span>
+                <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">QuickHealth</span>
             </div>
-            <p className="text-gray-500 text-sm mt-2 font-medium">Login to access your dashboard</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-2 font-medium">Login to access your dashboard</p>
         </div>
-        
-        {/* Messages */}
         {message && (
           <div className={`mb-6 p-4 text-sm rounded-xl border ${
             message.includes('Check') 
-                ? 'bg-green-50 text-green-700 border-green-200' 
-                : 'bg-red-50 text-red-700 border-red-200'
+                ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' 
+                : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'
           }`}>
             {message}
           </div>
         )}
-
-        {/* Inputs */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1 ml-1">Email</label>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1 ml-1">Email</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} placeholder="name@example.com" />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1 ml-1">Password</label>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1 ml-1">Password</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} placeholder="••••••••" />
           </div>
-
           <div className="pt-2 flex flex-col gap-3">
             <button onClick={handleLogin} disabled={loading} className="w-full bg-blue-600 text-white font-bold py-3.5 px-4 rounded-xl hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all shadow-lg shadow-blue-600/30">
               {loading ? 'Processing...' : 'Log In'}
             </button>
             <div className="relative flex py-2 items-center">
-                <div className="flex-grow border-t border-gray-200"></div>
+                <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
                 <span className="flex-shrink-0 mx-4 text-gray-400 text-xs font-semibold tracking-wider">OR</span>
-                <div className="flex-grow border-t border-gray-200"></div>
+                <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
             </div>
-            <Link 
-              href="/signup" 
-              className="w-full block text-center bg-white text-gray-700 font-bold border border-gray-200 py-3.5 px-4 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
-            >
+            <Link href="/signup" className="w-full block text-center bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold border border-gray-200 dark:border-gray-700 py-3.5 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 transition-all">
               Create New Account
             </Link>
           </div>
@@ -409,39 +398,31 @@ function LoginModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// --- Feature Card Component ---
 function FeatureCard({ icon, title, description, badge, badgeColor, href, buttonText, active, locked, footer }: any) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition flex flex-col h-full relative overflow-hidden group">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition flex flex-col h-full relative overflow-hidden group">
       {locked && (
         <div className="absolute top-0 right-0 p-4 opacity-50 group-hover:opacity-100 transition">
           <Lock className="w-5 h-5 text-gray-400" />
         </div>
       )}
       <div className="flex items-start justify-between mb-4">
-        <div className="p-3 bg-gray-50 rounded-xl group-hover:scale-110 transition duration-300">
+        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl group-hover:scale-110 transition duration-300">
           {icon}
         </div>
         <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide ${badgeColor}`}>
           {badge}
         </span>
       </div>
-      <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
-      <p className="text-gray-500 text-sm mb-6 flex-grow">{description}</p>
+      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{title}</h3>
+      <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 flex-grow">{description}</p>
       <div className="mt-auto">
         {footer ? (
-             <div className="w-full py-2 text-center text-sm text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200 cursor-not-allowed">
+             <div className="w-full py-2 text-center text-sm text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 cursor-not-allowed">
                 {footer}
              </div>
         ) : (
-            <Link 
-                href={active ? href : '#'}
-                className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium transition ${
-                    active 
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-            >
+            <Link href={active ? href : '#'} className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium transition ${active ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
                 {locked ? 'Unlock Feature' : buttonText}
                 {!locked && <ChevronRight className="w-4 h-4" />}
             </Link>
@@ -451,7 +432,6 @@ function FeatureCard({ icon, title, description, badge, badgeColor, href, button
   );
 }
 
-// --- Custom TikTok Icon ---
 function TikTokIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">

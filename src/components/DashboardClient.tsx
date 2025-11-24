@@ -14,7 +14,8 @@ import {
   Weight, 
   Calendar,
   X,
-  LayoutDashboard
+  LayoutDashboard,
+  Trash2
 } from 'lucide-react';
 import ResultView from '@/components/ResultView'; 
 
@@ -36,10 +37,10 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
   const supabase = createClientComponentClient();
   const router = useRouter();
   
-  // State for Modal
+  const [assessments, setAssessments] = useState<Assessment[]>(initialAssessments || []);
   const [selectedItem, setSelectedItem] = useState<Assessment | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   
-  const assessments = initialAssessments || [];
   const latest = assessments[0];
 
   const handleLogout = async () => {
@@ -47,27 +48,41 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
     router.refresh();
   };
 
-  // Helper for date formatting
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this record? This cannot be undone.")) return;
+
+    setIsDeleting(id);
+    const { error } = await supabase
+      .from('health_assessments')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+        alert("Error deleting: " + error.message);
+    } else {
+        setAssessments(prev => prev.filter(item => item.id !== id));
+        if (selectedItem?.id === id) setSelectedItem(null);
+        router.refresh(); 
+    }
+    setIsDeleting(null);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
     });
   };
 
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
+      hour: '2-digit', minute: '2-digit'
     });
   };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a192f] transition-colors duration-300 relative">
       
-      {/* --- BACKGROUND EFFECTS (from Block 2) --- */}
+      {/* Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none hidden dark:block">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-950 via-indigo-950 to-slate-900"></div>
           <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[120px]"></div>
@@ -76,9 +91,8 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
 
       <div className="relative z-10">
           
-          {/* --- NAVBAR --- */}
+          {/* NAVBAR */}
           <div className="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
-            {/* FIXED: Explicit colors for Light (gray-600) vs Dark (white) */}
             <Link 
               href="/" 
               className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-white/50 dark:hover:bg-white/10 transition text-gray-600 dark:text-blue-100 font-bold"
@@ -108,7 +122,7 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
 
           <div className="max-w-7xl mx-auto px-6 pb-12 space-y-12">
             
-            {/* --- 1. HERO SECTION (Latest Snapshot) --- */}
+            {/* HERO SECTION */}
             <div>
               <div className="flex items-center gap-2 mb-4">
                   <div className="p-2 bg-blue-100 dark:bg-blue-500/20 rounded-lg text-blue-600 dark:text-blue-400">
@@ -118,12 +132,10 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
               </div>
 
               {latest ? (
-                // Added onClick and cursor-pointer to make it open the modal
                 <div 
                     onClick={() => setSelectedItem(latest)}
                     className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[2.5rem] p-8 sm:p-12 text-white shadow-2xl shadow-blue-500/20 cursor-pointer group transition-transform hover:scale-[1.01]"
                 >
-                    {/* Background Decor */}
                     <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:bg-white/20 transition duration-700"></div>
 
                     <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -144,17 +156,12 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
                             <span className="block text-blue-200 text-xs font-bold uppercase tracking-widest mb-1">Weight</span>
                             <span className="text-4xl font-black">{latest.weight_kg} <span className="text-xl font-medium text-blue-200">kg</span></span>
                           </div>
-                          
-                          {/* Circular Score */}
                           <div className="relative w-32 h-32 flex items-center justify-center">
                             <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                                 <circle className="text-black/20 stroke-current" strokeWidth="10" cx="50" cy="50" r="40" fill="transparent"></circle>
                                 <circle 
-                                  className="text-white stroke-current" 
-                                  strokeWidth="10" 
-                                  strokeLinecap="round" 
-                                  cx="50" cy="50" r="40" 
-                                  fill="transparent"
+                                  className="text-white stroke-current" strokeWidth="10" strokeLinecap="round" 
+                                  cx="50" cy="50" r="40" fill="transparent"
                                   strokeDasharray="251.2"
                                   strokeDashoffset={251.2 - (251.2 * latest.health_score) / 100}
                                 ></circle>
@@ -178,7 +185,7 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
               )}
             </div>
 
-            {/* --- 2. HISTORY SECTION --- */}
+            {/* HISTORY SECTION */}
             <div>
               <div className="flex justify-between items-center mb-6">
                   <div className="flex items-center gap-2">
@@ -195,9 +202,22 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
                     <div 
                         key={item.id} 
                         onClick={() => setSelectedItem(item)}
-                        className="group bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:border-blue-200 dark:hover:border-blue-500/30 p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
+                        className="relative group bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:border-blue-200 dark:hover:border-blue-500/30 p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
                     >
-                        <div className="flex justify-between items-start mb-6">
+                        {/* DELETE BUTTON - Safe zone established */}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(item.id);
+                            }}
+                            className="absolute top-4 right-4 p-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/30 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                            title="Delete Record"
+                        >
+                            {isDeleting === item.id ? <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div> : <Trash2 className="w-4 h-4" />}
+                        </button>
+
+                        {/* HEADER - Added pr-14 to push content away from delete button */}
+                        <div className="flex justify-between items-start mb-6 pr-14">
                           <div>
                               <div className="font-bold text-gray-900 dark:text-white mb-1">
                                 {formatDate(item.created_at)}
@@ -206,7 +226,7 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
                                 {formatTime(item.created_at)}
                               </div>
                           </div>
-                          <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          <div className={`px-3 py-1 rounded-full text-xs font-bold flex-shrink-0 ${
                               item.health_score >= 80 ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300' :
                               item.health_score >= 50 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300' :
                               'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300'
@@ -240,16 +260,12 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
           </div>
       </div>
 
-      {/* --- VIEW DETAILS MODAL (from Block 2) --- */}
+      {/* --- VIEW DETAILS MODAL --- */}
       {selectedItem && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-200">
-            {/* Backdrop */}
             <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setSelectedItem(null)}></div>
             
-            {/* Modal Window */}
             <div className="relative w-full max-w-5xl h-full max-h-[90vh] bg-gray-50 dark:bg-[#0f172a] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col">
-                
-                {/* Modal Header */}
                 <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f172a] z-20">
                     <div>
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -257,7 +273,7 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
                              Historical Assessment
                         </h2>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Recorded on {new Date(selectedItem.created_at).toLocaleDateString()} at {new Date(selectedItem.created_at).toLocaleTimeString()}
+                            Recorded on {new Date(selectedItem.created_at).toLocaleDateString()}
                         </p>
                     </div>
                     <button 
@@ -268,9 +284,12 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
                     </button>
                 </div>
 
-                {/* Scrollable Content */}
                 <div className="flex-grow overflow-y-auto p-6 bg-gray-50 dark:bg-[#0a192f]">
-                    <ResultView data={selectedItem.form_data} onRetry={() => setSelectedItem(null)} />
+                    <ResultView 
+                        data={selectedItem.form_data} 
+                        onRetry={() => setSelectedItem(null)} 
+                        isHistorical={true} 
+                    />
                 </div>
             </div>
         </div>

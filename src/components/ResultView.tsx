@@ -21,18 +21,18 @@ import {
 interface ResultProps {
   data: HealthInput;
   onRetry: () => void;
+  isHistorical?: boolean; // New prop to control button visibility
 }
 
-export default function ResultView({ data, onRetry }: ResultProps) {
+export default function ResultView({ data, onRetry, isHistorical = false }: ResultProps) {
   const componentRef = useRef<HTMLDivElement>(null);
   const supabase = createClientComponentClient();
   
   // --- STATE ---
   const [saving, setSaving] = useState(false);
-  const [session, setSession] = useState<any>(null); // Track User Session
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false); // Control the "Login to Save" modal
+  const [session, setSession] = useState<any>(null);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // --- 1. CHECK SESSION ON MOUNT ---
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -42,7 +42,6 @@ export default function ResultView({ data, onRetry }: ResultProps) {
   }, [supabase.auth]);
 
   // --- CALCULATIONS ---
-  // Ensure we use the centralized logic from healthEngine
   const bmi = calcBMI(data.weight, data.height);
   const bmiCat = getBMICategory(bmi);
   const bmr = Math.round(calcBMR(data.gender, data.weight, data.height, data.age)); 
@@ -56,7 +55,6 @@ export default function ResultView({ data, onRetry }: ResultProps) {
   });
 
   const handleSave = async () => {
-    // 2. INTERCEPT SAVE IF NOT LOGGED IN
     if (!session) {
         setShowLoginPrompt(true);
         return;
@@ -72,7 +70,7 @@ export default function ResultView({ data, onRetry }: ResultProps) {
             height_cm: data.height,
             age: data.age,
             gender: data.gender,
-            form_data: data, // Stores the raw input JSON
+            form_data: data,
             bmi: bmi,
             health_score: results.overall,
             score_breakdown: results.breakdown
@@ -84,7 +82,6 @@ export default function ResultView({ data, onRetry }: ResultProps) {
     setSaving(false);
   };
 
-  // --- DYNAMIC COLORS ---
   const getScoreColor = (score: number) => {
       if (score >= 80) return 'text-emerald-500 dark:text-emerald-400';
       if (score >= 60) return 'text-blue-500 dark:text-blue-400';
@@ -145,14 +142,6 @@ export default function ResultView({ data, onRetry }: ResultProps) {
                     <div className="text-[10px] font-bold text-orange-600 dark:text-orange-300 uppercase">Daily Calories</div>
                 </div>
             </div>
-            
-            {/* Contextual Diagram - Only show if space permits or as a small helper */}
-            <div className="hidden print:block text-xs text-center text-gray-400 italic mt-2">
-               Your BMI is calculated based on weight/height ratio. 
-
-[Image of Body Mass Index Chart]
-
-            </div>
         </div>
 
         {/* RIGHT COLUMN: BREAKDOWN */}
@@ -163,39 +152,10 @@ export default function ResultView({ data, onRetry }: ResultProps) {
                     Analysis Breakdown
                 </h3>
                 <div className="space-y-5">
-                    {/* Note: Keys match the healthEngine.ts breakdown object keys: diet, sleep, activity, mental */}
-                    <BreakdownItem 
-                        icon={<Salad className="w-4 h-4" />} 
-                        label="Diet & Nutrition" 
-                        score={results.breakdown.diet} 
-                        color="text-green-500" 
-                        bg="bg-green-500" 
-                        detail={`Water Target: ${waterTarget} L/day`} 
-                    />
-                    <BreakdownItem 
-                        icon={<Moon className="w-4 h-4" />} 
-                        label="Sleep Quality" 
-                        score={results.breakdown.sleep} 
-                        color="text-indigo-500" 
-                        bg="bg-indigo-500" 
-                        detail="Aim for 7-8 hours consistent sleep" 
-                    />
-                    <BreakdownItem 
-                        icon={<Activity className="w-4 h-4" />} 
-                        label="Physical Activity" 
-                        score={results.breakdown.activity} 
-                        color="text-blue-500" 
-                        bg="bg-blue-500" 
-                        detail="Try to reach 7,000+ steps daily" 
-                    />
-                    <BreakdownItem 
-                        icon={<Brain className="w-4 h-4" />} 
-                        label="Mental Wellbeing" 
-                        score={results.breakdown.mental} 
-                        color="text-purple-500" 
-                        bg="bg-purple-500" 
-                        detail="Manage stress with breaks & mindfulness" 
-                    />
+                    <BreakdownItem icon={<Salad className="w-4 h-4" />} label="Diet & Nutrition" score={results.breakdown.diet} color="text-green-500" bg="bg-green-500" detail={`Water Target: ${waterTarget} L/day`} />
+                    <BreakdownItem icon={<Moon className="w-4 h-4" />} label="Sleep Quality" score={results.breakdown.sleep} color="text-indigo-500" bg="bg-indigo-500" detail="Aim for 7-8 hours consistent sleep" />
+                    <BreakdownItem icon={<Activity className="w-4 h-4" />} label="Physical Activity" score={results.breakdown.activity} color="text-blue-500" bg="bg-blue-500" detail="Try to reach 7,000+ steps daily" />
+                    <BreakdownItem icon={<Brain className="w-4 h-4" />} label="Mental Wellbeing" score={results.breakdown.mental} color="text-purple-500" bg="bg-purple-500" detail="Manage stress with breaks & mindfulness" />
                 </div>
                 
                 <div className="mt-8 p-5 bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-100 dark:border-white/5">
@@ -203,10 +163,7 @@ export default function ResultView({ data, onRetry }: ResultProps) {
                         <h4 className="font-bold text-gray-900 dark:text-white text-xs uppercase tracking-wide">Suggestion</h4>
                         {results.breakdown.diet < 60 && (
                             <span className="text-[10px] text-blue-500 underline cursor-help" title="View nutrition guide">
-                                
-
-[Image of balanced nutrition plate diagram]
-
+                                [Image of balanced nutrition plate diagram]
                             </span>
                         )}
                     </div>
@@ -225,12 +182,15 @@ export default function ResultView({ data, onRetry }: ResultProps) {
       <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-white/80 dark:bg-black/40 backdrop-blur-md rounded-2xl border border-gray-200 dark:border-white/10">
          
          <div className="flex items-center gap-4">
-             <button onClick={onRetry} className="text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white flex items-center gap-2 px-4 py-2 transition-colors">
-                <RefreshCw className="w-4 h-4" /> Start Over
-             </button>
+             {/* HIDE Start Over if viewing history */}
+             {!isHistorical && (
+                <button onClick={onRetry} className="text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white flex items-center gap-2 px-4 py-2 transition-colors">
+                    <RefreshCw className="w-4 h-4" /> Start Over
+                </button>
+             )}
 
-             {/* 3. CONDITIONALLY RENDER DASHBOARD BUTTON */}
-             {session && (
+             {/* HIDE Dashboard button if viewing history */}
+             {!isHistorical && session && (
                  <Link href="/dashboard" className="text-sm font-bold text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-2 px-4 py-2 transition-colors border-l border-gray-300 dark:border-white/10 pl-6">
                     <LayoutDashboard className="w-4 h-4" /> Dashboard
                  </Link>
@@ -242,17 +202,20 @@ export default function ResultView({ data, onRetry }: ResultProps) {
                 <Download className="w-4 h-4" /> PDF
             </button>
 
-            <button 
-                onClick={handleSave} 
-                disabled={saving}
-                className="flex-1 sm:flex-none px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                {saving ? <span className="animate-pulse">Saving...</span> : <><Save className="w-4 h-4" /> Save Results</>}
-            </button>
+            {/* HIDE Save Results if viewing history */}
+            {!isHistorical && (
+                <button 
+                    onClick={handleSave} 
+                    disabled={saving}
+                    className="flex-1 sm:flex-none px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {saving ? <span className="animate-pulse">Saving...</span> : <><Save className="w-4 h-4" /> Save Results</>}
+                </button>
+            )}
          </div>
       </div>
 
-      {/* --- 4. LOGIN REQUIRED MODAL --- */}
+      {/* --- LOGIN MODAL --- */}
       {showLoginPrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
             {/* Overlay */}

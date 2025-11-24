@@ -1,5 +1,10 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useRouter } from 'next/navigation';
 import { 
   Activity, 
   Stethoscope, 
@@ -9,12 +14,17 @@ import {
   ChevronRight, 
   Lock, 
   CheckCircle2,
-  Instagram
+  Instagram,
+  X // Added X for closing the modal
 } from 'lucide-react';
 
+// --- MAIN HOME COMPONENT ---
 export default function Home() {
+  // State to control the Login Modal visibility
+  const [showLogin, setShowLogin] = useState(false);
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col relative">
       
       {/* --- 1. NAVBAR --- */}
       <nav className="bg-white border-b sticky top-0 z-50">
@@ -42,13 +52,13 @@ export default function Home() {
               <Link href="#" className="hover:text-blue-600">Articles</Link>
             </div>
 
-            {/* Auth Button */}
-            <Link 
-              href="/login"
+            {/* Auth Button - NOW OPENS MODAL */}
+            <button 
+              onClick={() => setShowLogin(true)}
               className="bg-gray-900 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition"
             >
               Login / History
-            </Link>
+            </button>
           </div>
         </div>
       </nav>
@@ -90,7 +100,6 @@ export default function Home() {
                 </button>
               </div>
               
-              {/* --- UPDATED PART (Option 1) --- */}
               <div className="pt-6 flex items-center gap-4 text-sm text-blue-200 font-medium">
                 <div className="flex items-center gap-2 bg-blue-800/30 px-4 py-2 rounded-lg border border-blue-700/50">
                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
@@ -260,8 +269,6 @@ export default function Home() {
             {/* Bottom Bar */}
             <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p className="text-gray-500 text-sm">© 2025 QuickHealth. All rights reserved.</p>
-                
-                {/* Social Icons: TikTok and Instagram Only */}
                 <div className="flex gap-6 items-center">
                    <Link href="https://www.instagram.com/quickhealth.binus?igsh=Y2R3eGUybzJ2bnMx" className="text-gray-400 hover:text-white transition">
                       <Instagram className="w-5 h-5" />
@@ -273,6 +280,131 @@ export default function Home() {
             </div>
         </div>
       </footer>
+
+      {/* --- LOGIN MODAL (Conditionally Rendered) --- */}
+      {showLogin && (
+         <LoginModal onClose={() => setShowLogin(false)} />
+      )}
+
+    </div>
+  );
+}
+
+// --- LOGIN MODAL COMPONENT ---
+function LoginModal({ onClose }: { onClose: () => void }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const router = useRouter();
+  const supabase = createClientComponentClient();
+
+  const handleLogin = async () => {
+    setLoading(true);
+    setMessage('');
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      setMessage(error.message);
+      setLoading(false);
+    } else {
+      router.push('/dashboard');
+      router.refresh();
+    }
+  };
+
+  const handleSignUp = async () => {
+    setLoading(true);
+    setMessage('');
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${location.origin}/auth/callback` },
+    });
+    if (error) {
+      setMessage(error.message);
+    } else {
+      setMessage('Check your email for the confirmation link!');
+    }
+    setLoading(false);
+  };
+
+  const inputClass = "mt-1 block w-full rounded-xl border border-gray-200 bg-gray-50 text-gray-900 p-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-white transition-all outline-none";
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Dark Overlay with Blur */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
+      
+      {/* Modal Content */}
+      <div className="relative bg-white/90 backdrop-blur-xl w-full max-w-md rounded-3xl shadow-2xl p-8 border border-white/40 animate-in fade-in zoom-in duration-200">
+        
+        {/* Close Button */}
+        <button 
+          onClick={onClose} 
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition text-gray-500"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Branding */}
+        <div className="flex flex-col items-center mb-6">
+            <div className="flex items-center gap-2">
+                <div className="relative w-12 h-12 flex-shrink-0">
+                    <Image 
+                        src="/logonobg.jpg"
+                        alt="QuickHealth Logo"
+                        fill 
+                        className="object-contain rounded-lg"
+                    />
+                </div>
+                <span className="text-2xl font-bold text-gray-900 tracking-tight">
+                    QuickHealth
+                </span>
+            </div>
+            <p className="text-gray-500 text-sm mt-2 font-medium">Login to access your dashboard</p>
+        </div>
+        
+        {/* Messages */}
+        {message && (
+          <div className={`mb-6 p-4 text-sm rounded-xl border ${
+            message.includes('Check') 
+                ? 'bg-green-50 text-green-700 border-green-200' 
+                : 'bg-red-50 text-red-700 border-red-200'
+          }`}>
+            {message}
+          </div>
+        )}
+
+        {/* Inputs */}
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1 ml-1">Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} placeholder="name@example.com" />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1 ml-1">Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} placeholder="••••••••" />
+          </div>
+
+          <div className="pt-2 flex flex-col gap-3">
+            <button onClick={handleLogin} disabled={loading} className="w-full bg-blue-600 text-white font-bold py-3.5 px-4 rounded-xl hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all shadow-lg shadow-blue-600/30">
+              {loading ? 'Processing...' : 'Log In'}
+            </button>
+            <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-gray-200"></div>
+                <span className="flex-shrink-0 mx-4 text-gray-400 text-xs font-semibold tracking-wider">OR</span>
+                <div className="flex-grow border-t border-gray-200"></div>
+            </div>
+            <Link 
+              href="/signup" 
+              className="w-full block text-center bg-white text-gray-700 font-bold border border-gray-200 py-3.5 px-4 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
+            >
+              Create New Account
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -319,18 +451,10 @@ function FeatureCard({ icon, title, description, badge, badgeColor, href, button
   );
 }
 
-// --- Custom TikTok Icon (Since lucide-react doesn't have it) ---
+// --- Custom TikTok Icon ---
 function TikTokIcon() {
   return (
-    <svg 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className="w-5 h-5"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
       <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
     </svg>
   );

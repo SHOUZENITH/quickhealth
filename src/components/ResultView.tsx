@@ -21,7 +21,7 @@ import {
 interface ResultProps {
   data: HealthInput;
   onRetry: () => void;
-  isHistorical?: boolean; // New prop to control button visibility
+  isHistorical?: boolean; 
 }
 
 export default function ResultView({ data, onRetry, isHistorical = false }: ResultProps) {
@@ -161,11 +161,6 @@ export default function ResultView({ data, onRetry, isHistorical = false }: Resu
                 <div className="mt-8 p-5 bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-100 dark:border-white/5">
                     <div className="flex justify-between items-start mb-2">
                         <h4 className="font-bold text-gray-900 dark:text-white text-xs uppercase tracking-wide">Suggestion</h4>
-                        {results.breakdown.diet < 60 && (
-                            <span className="text-[10px] text-blue-500 underline cursor-help" title="View nutrition guide">
-                                [Image of balanced nutrition plate diagram]
-                            </span>
-                        )}
                     </div>
                     <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                         {results.overall > 80 

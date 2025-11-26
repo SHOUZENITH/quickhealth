@@ -242,7 +242,7 @@ export default function ResultView({ data, onRetry, isHistorical = false }: Resu
                         <LogIn className="w-4 h-4" /> Log In
                     </Link>
                     <Link 
-                        href="/signup" 
+                        href="/auth/signup" 
                         className="w-full py-3.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-white font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center justify-center gap-2"
                     >
                         <UserPlus className="w-4 h-4" /> Create Account

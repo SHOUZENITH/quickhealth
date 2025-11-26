@@ -400,7 +400,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
               {loading ? 'Processing...' : 'Log In'}
             </button>
             <div className="text-center text-sm text-gray-500 mt-2">
-                Don't have an account? <Link href="/signup" className="text-blue-600 dark:text-blue-400 font-bold hover:underline">Sign Up</Link>
+                Don't have an account? <Link href="/auth/signup" className="text-blue-600 dark:text-blue-400 font-bold hover:underline">Sign Up</Link>
             </div>
           </div>
         </div>

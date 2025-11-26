@@ -178,7 +178,7 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white">No Analysis Found</h3>
                     <p className="text-gray-500 dark:text-gray-400 mt-2 mb-6">Take your first health checkup to see your score here.</p>
-                    <Link href="/calculator" className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition">
+                    <Link href="/feature/calculator" className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition">
                       <Plus className="w-5 h-5" /> Start Checkup
                     </Link>
                 </div>
@@ -192,7 +192,7 @@ export default function DashboardClient({ session, initialAssessments }: Dashboa
                     <Clock className="w-5 h-5 text-gray-400" />
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">History</h2>
                   </div>
-                  <Link href="/calculator" className="flex items-center gap-1 text-sm font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400">
+                  <Link href="/feature/calculator" className="flex items-center gap-1 text-sm font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400">
                     <Plus className="w-4 h-4" /> New Checkup
                   </Link>
               </div>

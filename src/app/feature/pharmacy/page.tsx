@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { 
   Search, 
   ShoppingBag, 
   ArrowLeft, 
-  Filter, 
   Plus, 
   Minus, 
   Trash2, 
@@ -17,10 +16,11 @@ import {
   HeartPulse, 
   Sparkles,
   X,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from 'lucide-react';
 
-// --- MOCK DATA ---
+// --- MOCK PRODUCT DATA ---
 const CATEGORIES = [
   { id: 'all', name: 'All Products', icon: <Sparkles className="w-4 h-4" /> },
   { id: 'vitamins', name: 'Vitamins', icon: <Pill className="w-4 h-4" /> },
@@ -42,13 +42,50 @@ const PRODUCTS = [
 ];
 
 export default function PharmacyPage() {
+  const supabase = createClientComponentClient();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Cart State with Memory Logic
   const [cart, setCart] = useState<{ product: any; quantity: number }[]>([]);
+  const [isCartLoaded, setIsCartLoaded] = useState(false); 
+  
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [showCheckoutSuccess, setShowCheckoutSuccess] = useState(false);
+  const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [user, setUser] = useState<any>(null);
 
-  // Filter Products
+  // 1. Check user on load
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, [supabase]);
+
+  // 2. LOAD CART from Local Storage on mount (The "Grab Memory" Feature)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedCart = localStorage.getItem('qh_cart');
+      if (savedCart) {
+          try {
+              setCart(JSON.parse(savedCart));
+          } catch (e) {
+              console.error("Failed to parse cart", e);
+          }
+      }
+      setIsCartLoaded(true); 
+    }
+  }, []);
+
+  // 3. SAVE CART to Local Storage whenever it changes
+  useEffect(() => {
+    if (isCartLoaded) {
+        localStorage.setItem('qh_cart', JSON.stringify(cart));
+    }
+  }, [cart, isCartLoaded]);
+
+  // Filter Products Logic
   const filteredProducts = useMemo(() => {
     return PRODUCTS.filter((product) => {
       const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
@@ -57,7 +94,7 @@ export default function PharmacyPage() {
     });
   }, [activeCategory, searchQuery]);
 
-  // Cart Logic
+  // Cart Add/Remove Logic
   const addToCart = (product: any) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
@@ -94,14 +131,61 @@ export default function PharmacyPage() {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(price);
   };
 
-  const handleCheckout = () => {
-      setShowCheckoutSuccess(true);
-      setCart([]);
-      setTimeout(() => {
-          setShowCheckoutSuccess(false);
-          setIsCartOpen(false);
-      }, 3000);
-  }
+  // --- SUPABASE CHECKOUT LOGIC ---
+  const handleCheckout = async () => {
+    if (!user) {
+        alert("Please login to checkout");
+        return;
+    }
+    
+    setCheckoutStatus('loading');
+
+    try {
+        // 1. Create the Order in Supabase
+        const { data: orderData, error: orderError } = await supabase
+            .from('orders')
+            .insert({
+                user_id: user.id,
+                total_amount: cartTotal,
+                status: 'pending',
+                shipping_address: 'Default Address'
+            })
+            .select()
+            .single();
+
+        if (orderError) throw orderError;
+
+        // 2. Create Order Items
+        const orderItems = cart.map(item => ({
+            order_id: orderData.id,
+            product_name: item.product.name,
+            quantity: item.quantity,
+            price_per_unit: item.product.price
+        }));
+
+        const { error: itemsError } = await supabase
+            .from('order_items')
+            .insert(orderItems);
+
+        if (itemsError) throw itemsError;
+
+        // 3. Success State & CLEAR CART
+        setCheckoutStatus('success');
+        setCart([]); // Clear React state
+        localStorage.removeItem('qh_cart'); // Clear Memory
+        
+        // Close drawer after delay
+        setTimeout(() => {
+            setCheckoutStatus('idle');
+            setIsCartOpen(false);
+        }, 3000);
+
+    } catch (error: any) {
+        console.error('Checkout failed:', error);
+        alert('Checkout failed: ' + error.message);
+        setCheckoutStatus('idle');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#050b14] text-gray-900 dark:text-white font-sans transition-colors duration-300">
@@ -244,25 +328,25 @@ export default function PharmacyPage() {
 
             <div className="flex-grow overflow-y-auto p-6 space-y-6">
               {cart.length === 0 ? (
-                 !showCheckoutSuccess ? (
-                    <div className="text-center py-12 text-gray-500">
-                    <ShoppingBag className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                    <p>Your cart is empty.</p>
-                    <button 
-                        onClick={() => setIsCartOpen(false)}
-                        className="mt-4 text-blue-500 font-bold hover:underline"
-                    >
-                        Start Shopping
-                    </button>
-                    </div>
-                 ) : (
+                 checkoutStatus === 'success' ? (
                      <div className="flex flex-col items-center justify-center h-full text-center animate-in zoom-in duration-300">
                          <div className="w-20 h-20 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mb-6">
                              <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
                          </div>
                          <h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">Order Placed!</h3>
-                         <p className="text-gray-500">Your order has been sent to the pharmacy.</p>
+                         <p className="text-gray-500">We received your order.</p>
                      </div>
+                 ) : (
+                    <div className="text-center py-12 text-gray-500">
+                        <ShoppingBag className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                        <p>Your cart is empty.</p>
+                        <button 
+                            onClick={() => setIsCartOpen(false)}
+                            className="mt-4 text-blue-500 font-bold hover:underline"
+                        >
+                            Start Shopping
+                        </button>
+                    </div>
                  )
               ) : (
                 cart.map((item) => (
@@ -314,9 +398,17 @@ export default function PharmacyPage() {
                 </div>
                 <button 
                   onClick={handleCheckout}
-                  className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98]"
+                  disabled={checkoutStatus === 'loading'}
+                  className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Checkout Now
+                  {checkoutStatus === 'loading' ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Processing...
+                      </>
+                  ) : (
+                      "Checkout Now"
+                  )}
                 </button>
               </div>
             )}

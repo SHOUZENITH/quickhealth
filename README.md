@@ -1,36 +1,170 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏥 QuickHealth
 
-## Getting Started
+A modern healthcare superapp integrating **telemedicine**, **pharmacy e-commerce**, and **population health analytics** into one unified platform.
 
-First, run the development server:
+QuickHealth reduces fragmentation in patient care by bringing together:  
+**Health Tracking**, **Telemedicine**, and **E-commerce**, all backed by secure PostgreSQL Row Level Security (RLS).
+
+---
+
+## 📖 Overview
+
+QuickHealth includes a powerful **Admin Command Center** for:
+
+- Managing pharmacy orders  
+- Viewing population health insights  
+- Handling CRM and user data  
+- Monitoring health trends and risk factors  
+
+Security is designed with strict **Role-Based Access Control (RBAC)** enforced via **Supabase RLS policies**, ensuring complete data isolation between patients and administrators.
+
+---
+
+## ✨ Key Features
+
+### **🛠 Admin Command Center**
+- **CRM Dashboard:** View user profiles and medical history summaries  
+- **Analytics Hub:** Real-time charts for BMI distribution, population risk levels, health score trends  
+- **Order Management:** Update pharmacy order statuses (Pending → Shipped)
+
+---
+
+### **💊 Pharmacy E-commerce**
+- Full shopping cart (persistent using Local Storage)  
+- Category-based browsing and medication search  
+- Smooth checkout experience  
+
+---
+
+### **🩺 Telemedicine**
+- Find doctors by specialty, rating, and availability  
+- Mock video appointment booking flow  
+- Health calculators:  
+  - **BMI** (Body Mass Index)  
+  - **BMR** (Basal Metabolic Rate)  
+- Personalized health recommendations  
+
+---
+
+### **🔐 Security**
+- **Row Level Security (RLS)** ensures each user only accesses their own medical data  
+- **Admins** have elevated access through email-based rules  
+- Zero-trust client architecture  
+
+---
+
+## 🛠️ Tech Stack
+
+### **Frontend**
+- Next.js 14 (App Router & Server Components)  
+- Tailwind CSS (Dark/Light Mode)  
+- Lucide Icons  
+- Recharts (Health analytics visualizations)
+
+### **Backend & Database**
+- Supabase (Auth, Database, Storage)  
+- PostgreSQL  
+- Row Level Security (RLS) Policies  
+
+---
+
+## 📸 Gallery
+
+_(Insert screenshots or GIFs here as needed)_
+
+- **Admin Command Center**  
+- **Pharmacy Store (Dark Mode)**  
+- **Doctor Booking Flow**  
+- **E-commerce Checkout**
+
+---
+
+## 🚀 Getting Started
+
+### **Prerequisites**
+- Node.js (v18+)  
+- Supabase Project (Free Tier)
+
+---
+
+### **1. Clone the Repository**
+
+```bash
+git clone https://github.com/yourusername/quickhealth.git
+cd quickhealth
+```
+
+---
+
+### **2. Install Dependencies**
+
+```bash
+npm install
+```
+
+---
+
+### **3. Environment Variables**
+
+Create `.env.local` in the project root:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+---
+
+### **4. Database Setup**
+
+Run the SQL schema located at:
+
+```
+/supabase/schema.sql
+```
+
+This includes:
+- Tables  
+- RLS Policies  
+- Triggers  
+
+---
+
+### **5. Run the Application**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Your app will be available at:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+👉 **http://localhost:3000**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🔐 Security Architecture
 
-To learn more about Next.js, take a look at the following resources:
+QuickHealth follows a **Zero Trust** model.  
+All security enforcement happens directly in **PostgreSQL RLS**:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Role | Permissions |
+|------|-------------|
+| **Public** | View products & articles |
+| **Authenticated Users** | View & edit *only their own* profile + orders |
+| **Admins** | Full access via email-based RLS bypass rules |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+No sensitive logic is trusted on the client.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🤝 Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Contributions, issues, and feature requests are welcome!  
+Feel free to open a PR or start a discussion.
+
+---
+
+## 📄 License
+
+This project is open-source under the **MIT License**.
+

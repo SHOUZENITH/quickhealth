@@ -41,7 +41,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           {/* Logo Area */}
           <div className="flex items-center gap-2">
-            <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200 dark:border-transparent">
+            <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg">
                <Image 
                  src="/logonobg.png" 
                  alt="QuickHealth Logo" 
@@ -288,7 +288,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
               <div className="col-span-1 md:col-span-2">
                     <div className="flex items-center gap-2 mb-4">
-                        <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200 dark:border-transparent">
+                        <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg">
                             <Image src="/logonobg.png" alt="QuickHealth Logo" fill className="object-contain" />
                         </div>
                         <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
@@ -373,7 +373,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
         </button>
         
         <div className="flex flex-col items-center mb-6">
-            <div className="w-32 h-32 rounded-lg flex items-center justify-center mb-3 overflow-hidden border border-gray-200 dark:border-transparent">
+            <div className="w-32 h-32 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
                  <Image src="/logonobg.png" alt="Logo" width={128} height={128} className="object-contain" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</h2>

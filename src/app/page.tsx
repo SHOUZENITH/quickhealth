@@ -43,7 +43,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <div className="relative w-10 h-10 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-white border border-gray-200 dark:border-transparent">
                <Image 
-                 src="/logonobg.jpg" 
+                 src="/logonobg.png" 
                  alt="QuickHealth Logo" 
                  fill 
                  className="object-contain"
@@ -289,7 +289,7 @@ export default function Home() {
               <div className="col-span-1 md:col-span-2">
                     <div className="flex items-center gap-2 mb-4">
                         <div className="relative w-8 h-8 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-white border border-gray-200 dark:border-transparent">
-                            <Image src="/logonobg.jpg" alt="QuickHealth Logo" fill className="object-contain" />
+                            <Image src="/logonobg.png" alt="QuickHealth Logo" fill className="object-contain" />
                         </div>
                         <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
                             QuickHealth
@@ -374,7 +374,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
         
         <div className="flex flex-col items-center mb-6">
             <div className="w-12 h-12 bg-gray-100 dark:bg-white rounded-lg flex items-center justify-center mb-3 overflow-hidden border border-gray-200 dark:border-transparent">
-                 <Image src="/logonobg.jpg" alt="Logo" width={40} height={40} className="object-contain" />
+                 <Image src="/logonobg.png" alt="Logo" width={40} height={40} className="object-contain" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Login to access your dashboard</p>

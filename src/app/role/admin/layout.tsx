@@ -9,16 +9,16 @@ import {
   Users, 
   Activity, 
   LogOut,
-  LayoutDashboard 
+  LayoutDashboard,
+  ShoppingBag // New Icon for Inventory
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClientComponentClient();
   const router = useRouter();
-  const pathname = usePathname(); // To check which page is active
+  const pathname = usePathname(); 
   const [authorized, setAuthorized] = useState(false);
 
-  // --- GLOBAL SECURITY CHECK ---
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -32,12 +32,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     checkAdmin();
   }, [supabase, router]);
 
-  if (!authorized) return null; // Wait for check
+  if (!authorized) return null; 
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#050b14] text-gray-900 dark:text-white font-sans flex">
       
-      {/* --- STATIC SIDEBAR --- */}
       <aside className="w-64 bg-white dark:bg-[#0f172a] border-r border-gray-200 dark:border-white/5 flex flex-col fixed h-full z-20">
         <div className="p-6 border-b border-gray-200 dark:border-white/5 flex items-center gap-3">
            <div className="p-2 bg-blue-600 rounded-lg">
@@ -51,22 +50,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         <nav className="flex-grow p-4 space-y-2">
           <SidebarLink 
-            href="/admin/pharmacy" 
+            href="/role/admin/pharmacy" 
             icon={<Package className="w-5 h-5" />} 
             label="Pharmacy Orders" 
-            active={pathname === '/admin/pharmacy'}
+            active={pathname === '/role/admin/pharmacy'}
+          />
+          {/* NEW LINK HERE */}
+          <SidebarLink 
+            href="/role/admin/products" 
+            icon={<ShoppingBag className="w-5 h-5" />} 
+            label="Inventory / Products" 
+            active={pathname === '/role/admin/products'}
           />
           <SidebarLink 
-            href="/admin/insights" 
+            href="/role/admin/insights" 
             icon={<Activity className="w-5 h-5" />} 
             label="Health Insights" 
-            active={pathname === '/admin/insights'}
+            active={pathname === '/role/admin/insights'}
           />
           <SidebarLink 
-            href="/admin/crm" 
+            href="/role/admin/crm" 
             icon={<Users className="w-5 h-5" />} 
             label="User CRM" 
-            active={pathname === '/admin/crm'}
+            active={pathname === '/role/admin/crm'}
           />
         </nav>
 
@@ -81,7 +87,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* --- PAGE CONTENT --- */}
       <main className="flex-1 ml-64 p-8">
         {children}
       </main>

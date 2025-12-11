@@ -238,7 +238,7 @@ export default function Home() {
             active={true}
           />
           
-          {/* 4. CONSULT (UNLOCKED) */}
+          {/* 4. CONSULT*/}
           <FeatureCard 
             icon={<Stethoscope className="w-6 h-6 text-rose-500 dark:text-rose-400" />}
             title="Consult Doctor"
@@ -252,7 +252,7 @@ export default function Home() {
             locked={false} // Explicitly unlocked
           />
           
-          {/* 5. AI ASSISTANT (LOCKED) */}
+          {/* 5. AI ASSISTANT*/}
           <FeatureCard 
             icon={<Bot className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />}
             title="Health Assistant"
@@ -262,8 +262,8 @@ export default function Home() {
             iconBg="bg-indigo-50 dark:bg-indigo-500/10"
             href="/feature/assistant"
             buttonText="Chat Now"
-            active={false} // Inactive
-            locked={true}  // Locked
+            active={true} // Inactive
+            locked={false}  // Locked
           />
           
           {/* 6. LAB TESTS (Placeholder) */}

@@ -150,7 +150,6 @@ export default function InventoryManager() {
 
   const formatIDR = (val: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(val);
 
-  // Helper class for dark mode options
   const optionClass = "bg-white dark:bg-[#0f172a] text-gray-900 dark:text-white";
 
   return (
